@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Voyage AI - Interplanetary Travel Planner</title>
+    <style>
+        /* =========================
+           FUTURISTIC SPACE THEME
+           ========================= */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Animated starfield background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* Main container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(15, 20, 40, 0.8);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(100, 150, 255, 0.3);
+            box-shadow: 0 0 30px rgba(100, 150, 255, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            color: #a0a0a0;
+        }
+        
+        /* Main layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Card styling */
+        .card {
+            background: rgba(20, 25, 45, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        /* Input section */
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b0b0b0;
+            font-weight: 500;
+        }
+        
+        .input-group input,
+        .input-group textarea,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(10, 15, 30, 0.8);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus,
+        .input-group textarea:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .input-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* Button */
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Loading spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(100, 150, 255, 0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Results section */
+        .results {
+            display: none;
+        }
+        
+        .results.active {
+            display: block;
+        }
+        
+        .itinerary-header {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .itinerary-header h3 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        
+        .itinerary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-box {
+            background: rgba(10, 15, 30, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            color: #a0a0a0;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: #667eea;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+        
+        /* Day cards */
+        .day-card {
+            background: rgba(30, 35, 55, 0.8);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .day-card h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .activity {
+            background: rgba(10, 15, 30, 0.6);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #764ba2;
+        }
+        
+        .activity-time {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .activity-details {
+            color: #d0d0d0;
+        }
+        
+        /* Validation badges */
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .badge-success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+        
+        .badge-warning {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+            border: 1px solid #ff9800;
+        }
+        
+        .badge-error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+        
+        /* Example queries */
+        .example-queries {
+            margin-top: 20px;
+        }
+        
+        .example-query {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .example-query:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        /* =========================
+           WEATHER PANEL — MCP Data
+           ========================= */
+        .weather-panel {
+            background: linear-gradient(135deg, rgba(5, 15, 40, 0.97) 0%, rgba(0, 10, 28, 0.97) 100%);
+            border: 1px solid rgba(0, 200, 255, 0.35);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 22px;
+            box-shadow: 0 0 24px rgba(0, 200, 255, 0.1), inset 0 0 40px rgba(0,0,0,0.3);
+        }
+        .weather-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .weather-panel-title {
+            color: #00c8ff;
+            font-size: 1.05em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .weather-source-badge {
+            font-size: 0.72em;
+            background: rgba(0, 200, 255, 0.1);
+            border: 1px solid rgba(0, 200, 255, 0.35);
+            color: #00c8ff;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .weather-timestamp {
+            font-size: 0.78em;
+            color: #405570;
+        }
+        .space-weather-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .space-weather-stat {
+            background: rgba(0, 10, 30, 0.75);
+            border: 1px solid rgba(0, 200, 255, 0.12);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .space-weather-stat-label {
+            color: #506070;
+            font-size: 0.72em;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .space-weather-stat-value {
+            font-size: 0.95em;
+            font-weight: 700;
+        }
+        .kp-bar-wrap {
+            background: rgba(0,0,0,0.4);
+            border-radius: 4px;
+            height: 5px;
+            width: 100%;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .kp-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .weather-dest-card {
+            background: rgba(0, 10, 30, 0.75);
+            border: 1px solid rgba(0, 200, 255, 0.14);
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .weather-dest-name {
+            color: #00c8ff;
+            font-weight: 700;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+        .weather-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.81em;
+            margin-bottom: 5px;
+            color: #7090a0;
+        }
+        .weather-row-value {
+            color: #c0d8e8;
+            font-weight: 500;
+            text-align: right;
+            max-width: 58%;
+        }
+        .eva-badge {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 700;
+        }
+        .eva-badge.ok  { background: rgba(76,175,80,0.2);  color: #4caf50; border: 1px solid #4caf50; }
+        .eva-badge.warn{ background: rgba(244,67,54,0.2);  color: #f44336; border: 1px solid #f44336; }
+        .weather-alerts {
+            background: rgba(244, 67, 54, 0.07);
+            border: 1px solid rgba(244, 67, 54, 0.4);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-top: 10px;
+        }
+        .weather-alerts-title {
+            color: #f44336;
+            font-weight: 700;
+            font-size: 0.88em;
+            margin-bottom: 8px;
+        }
+        .weather-alert-item {
+            color: #ffcccc;
+            font-size: 0.83em;
+            margin-bottom: 4px;
+            padding-left: 14px;
+            position: relative;
+        }
+        .weather-alert-item::before { content: '!'; position: absolute; left: 0; color: #f44336; font-weight: bold; }
+        .weather-all-clear {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4caf50;
+            font-size: 0.86em;
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 8px 14px;
+            background: rgba(76, 175, 80, 0.07);
+            border: 1px solid rgba(76, 175, 80, 0.28);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated starfield -->
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 STELLAR VOYAGE AI</h1>
+            <p>Your Personal Interplanetary Travel Concierge</p>
+            <p style="font-size: 0.9em; color: #667eea; margin-top: 10px;">
+                Powered by Multi-Agent AI | GPT-4o | RAG | LangGraph
+            </p>
+        </div>
+        
+        <!-- Main layout -->
+        <div class="main-layout">
+            <!-- Left: Input section -->
+            <div class="card">
+                <h2>✨ Plan Your Journey</h2>
+                
+                <div class="input-group">
+                    <label for="query">Describe Your Dream Trip</label>
+                    <textarea 
+                        id="query" 
+                        placeholder="Example: I want a 14-day luxury trip visiting the Moon and Mars with exclusive VVIP experiences..."
+                    ></textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="budget">Maximum Budget (USD)</label>
+                    <input 
+                        type="number" 
+                        id="budget" 
+                        placeholder="150000000"
+                        value="150000000"
+                    >
+                </div>
+                
+                <div class="input-group">
+                    <label for="passengers">Number of Passengers</label>
+                    <input 
+                        type="number" 
+                        id="passengers" 
+                        placeholder="2"
+                        value="2"
+                        min="1"
+                        max="50"
+                    >
+                </div>
+                
+                <div class="input-group">
+                    <label for="location">Preferred Destination (Optional)</label>
+                    <select id="location">
+                        <option value="">Any Destination</option>
+                        <option value="Moon">Moon</option>
+                        <option value="Mars">Mars</option>
+                        <option value="Asteroid Belt">Asteroid Belt</option>
+                        <option value="Earth Orbit">Earth Orbit</option>
+                        <option value="Titan">Titan (Saturn Moon)</option>
+                    </select>
+                </div>
+                
+                <button class="btn-primary" onclick="planTravel()" id="planBtn">
+                    🚀 Generate Itinerary
+                </button>
+                
+                <!-- Example queries -->
+                <div class="example-queries">
+                    <label style="color: #b0b0b0; margin-bottom: 10px; display: block;">
+                        💡 Try these examples:
+                    </label>
+                    <div class="example-query" onclick="setExample(1)">
+                        7-day luxury Moon vacation with spacewalk experience
+                    </div>
+                    <div class="example-query" onclick="setExample(2)">
+                        14-day Mars colony tour with Olympus Mons expedition
+                    </div>
+                    <div class="example-query" onclick="setExample(3)">
+                        Ultimate 30-day journey: Moon → Mars → Asteroid Belt
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Results section -->
+            <div class="card">
+                <h2>🌌 Your Itinerary</h2>
+                
+                <!-- Loading state -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>AI agents are planning your journey...</p>
+                    <p style="font-size: 0.9em; color: #a0a0a0; margin-top: 10px;">
+                        Retrieving knowledge → 🛰️ Fetching live weather → Optimizing route → Validating → Verifying
+                    </p>
+                </div>
+                
+                <!-- Results -->
+                <div class="results" id="results">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                
+                <!-- Initial state -->
+                <div id="initialState">
+                    <p style="text-align: center; color: #a0a0a0; padding: 40px 20px;">
+                        Enter your travel requirements and click "Generate Itinerary" to begin your interplanetary adventure!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // =========================
+        // INITIALIZE STARFIELD
+        // =========================
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        createStars();
+        
+        // =========================
+        // EXAMPLE QUERIES
+        // =========================
+        function setExample(num) {
+            const examples = {
+                1: {
+                    query: "I want a 7-day luxury vacation to the Moon with a private spacewalk experience, staying at the best resort with Earth-view windows.",
+                    budget: 20000000,
+                    passengers: 2,
+                    location: "Moon"
+                },
+                2: {
+                    query: "Plan a 14-day Mars colony experience including rover racing, Olympus Mons expedition, and meeting with colonists. I want the full Martian adventure!",
+                    budget: 80000000,
+                    passengers: 1,
+                    location: "Mars"
+                },
+                3: {
+                    query: "Create the ultimate 30-day interplanetary journey visiting Moon, Mars, and Asteroid 16 Psyche. I want exclusive VVIP experiences at each destination with the most luxurious spacecraft.",
+                    budget: 250000000,
+                    passengers: 4,
+                    location: ""
+                }
+            };
+            
+            const example = examples[num];
+            document.getElementById('query').value = example.query;
+            document.getElementById('budget').value = example.budget;
+            document.getElementById('passengers').value = example.passengers;
+            document.getElementById('location').value = example.location;
+        }
+        
+        // =========================
+        // MAIN FUNCTION: PLAN TRAVEL
+        // =========================
+        async function planTravel() {
+            // Get input values
+            const query = document.getElementById('query').value.trim();
+            const budget = parseInt(document.getElementById('budget').value) || 0;
+            const passengers = parseInt(document.getElementById('passengers').value) || 1;
+            const location = document.getElementById('location').value;
+            
+            // Validation
+            if (!query) {
+                alert('Please describe your travel requirements!');
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('initialState').style.display = 'none';
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('planBtn').disabled = true;
+            
+            try {
+                // Call API
+                const response = await fetch('http://localhost:8080/plan-travel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        constraints: {
+                            max_budget: budget,
+                            passengers: passengers,
+                            location: location || undefined
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Hide loading
+                document.getElementById('loading').classList.remove('active');
+                
+                // Display results
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('results').innerHTML = `
+                    <div style="text-align: center; color: #f44336; padding: 20px;">
+                        <h3>Error</h3>
+                        <p>Failed to connect to API. Make sure the backend server is running on http://localhost:8080</p>
+                        <p style="font-size: 0.9em; margin-top: 10px;">Error: ${error.message}</p>
+                    </div>
+                `;
+                document.getElementById('results').classList.add('active');
+            } finally {
+                document.getElementById('planBtn').disabled = false;
+            }
+        }
+        
+        // =========================
+        // WEATHER PANEL BUILDER
+        // =========================
+        function buildWeatherPanel(weather) {
+            if (!weather || weather.error || Object.keys(weather).length === 0) return '';
+
+            const DEST_ICONS = { Moon: '🌕', Mars: '🔴', 'Earth Orbit': '🌍', 'Asteroid Belt': '☄️', Titan: '🪐' };
+            const sw   = weather.space_weather  || {};
+            const dests = weather.destinations  || {};
+            const alerts = weather.safety_alerts || [];
+            const ts = weather.fetched_at
+                ? new Date(weather.fetched_at).toUTCString().replace('GMT','UTC')
+                : '';
+
+            let html = `
+                <div class="weather-panel">
+                    <div class="weather-panel-header">
+                        <div class="weather-panel-title">
+                            🛰️ Live Space Weather Conditions
+                            <span class="weather-source-badge">NASA · NOAA via MCP</span>
+                        </div>
+                        ${ts ? `<span class="weather-timestamp">Updated: ${ts}</span>` : ''}
+                    </div>
+            `;
+
+            // Global space weather stats strip
+            if (Object.keys(sw).length > 0) {
+                const kp       = sw.kp_index || 0;
+                const kpPct    = Math.min((kp / 9) * 100, 100);
+                const kpColor  = kp >= 7 ? '#f44336' : kp >= 5 ? '#ff9800' : '#4caf50';
+                const stormHtml = sw.geomagnetic_storm_active
+                    ? '<span style="color:#f44336">⚡ Active</span>'
+                    : '<span style="color:#4caf50">✓ Calm</span>';
+                const flareHtml = sw.solar_flare_alert
+                    ? `<span style="color:#ff9800">⚠ ${(sw.solar_flares_today || []).length} flare(s)</span>`
+                    : '<span style="color:#4caf50">✓ None</span>';
+                const deepHtml  = sw.safe_for_deep_space_travel !== false
+                    ? '<span style="color:#4caf50">✓ Safe</span>'
+                    : '<span style="color:#f44336">✗ Unsafe</span>';
+                const beltHtml  = `<span style="color:${kpColor}">${(sw.radiation_belt_status || 'normal').toUpperCase()}</span>`;
+
+                html += `
+                    <div class="space-weather-row">
+                        <div class="space-weather-stat">
+                            <div class="space-weather-stat-label">Kp Index</div>
+                            <div class="space-weather-stat-value" style="color:${kpColor}">${kp.toFixed(1)}</div>
+                            <div class="kp-bar-wrap"><div class="kp-bar-fill" style="width:${kpPct}%;background:${kpColor}"></div></div>
+                        </div>
+                        <div class="space-weather-stat">
+                            <div class="space-weather-stat-label">Geomagnetic</div>
+                            <div class="space-weather-stat-value">${stormHtml}</div>
+                        </div>
+                        <div class="space-weather-stat">
+                            <div class="space-weather-stat-label">Solar Flares</div>
+                            <div class="space-weather-stat-value">${flareHtml}</div>
+                        </div>
+                        <div class="space-weather-stat">
+                            <div class="space-weather-stat-label">Radiation Belt</div>
+                            <div class="space-weather-stat-value">${beltHtml}</div>
+                        </div>
+                        <div class="space-weather-stat">
+                            <div class="space-weather-stat-label">Deep Space</div>
+                            <div class="space-weather-stat-value">${deepHtml}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Per-destination cards
+            if (Object.keys(dests).length > 0) {
+                html += '<div class="weather-grid">';
+                for (const [name, c] of Object.entries(dests)) {
+                    const icon    = DEST_ICONS[name] || '🪐';
+                    const evaSafe = c.safe_for_eva !== false;
+                    let rows = '';
+
+                    if (c.temperature_min_celsius !== undefined)
+                        rows += `<div class="weather-row"><span>Temperature</span><span class="weather-row-value">${c.temperature_min_celsius}°C → ${c.temperature_max_celsius}°C</span></div>`;
+                    if (c.temperature_celsius !== undefined)
+                        rows += `<div class="weather-row"><span>Temperature</span><span class="weather-row-value">${c.temperature_celsius}°C</span></div>`;
+                    if (c.solar_wind_speed_km_s !== undefined)
+                        rows += `<div class="weather-row"><span>Solar Wind</span><span class="weather-row-value">${c.solar_wind_speed_km_s} km/s</span></div>`;
+                    if (c.solar_wind_density_cm3 !== undefined)
+                        rows += `<div class="weather-row"><span>SW Density</span><span class="weather-row-value">${c.solar_wind_density_cm3} n/cm³</span></div>`;
+                    if (c.pressure_pa !== undefined)
+                        rows += `<div class="weather-row"><span>Pressure</span><span class="weather-row-value">${c.pressure_pa} Pa</span></div>`;
+                    if (c.radiation_level) {
+                        const rc = c.radiation_level === 'high' ? '#f44336' : c.radiation_level.includes('moderate-high') ? '#ff9800' : '#4caf50';
+                        rows += `<div class="weather-row"><span>Radiation</span><span class="weather-row-value" style="color:${rc}">${c.radiation_level}</span></div>`;
+                    }
+                    if (c.storm_risk) {
+                        const rc = c.storm_risk === 'high' ? '#f44336' : '#4caf50';
+                        rows += `<div class="weather-row"><span>Storm Risk</span><span class="weather-row-value" style="color:${rc}">${c.storm_risk.toUpperCase()}</span></div>`;
+                    }
+                    if (c.eva_recommendation)
+                        rows += `<div class="weather-row" style="margin-top:6px"><span style="color:#405060;font-size:0.78em;font-style:italic">${c.eva_recommendation}</span></div>`;
+                    if (c.source)
+                        rows += `<div class="weather-row" style="margin-top:4px"><span style="color:#304050;font-size:0.72em">${c.source}</span></div>`;
+
+                    html += `
+                        <div class="weather-dest-card">
+                            <div class="weather-dest-name">
+                                ${icon} ${name}
+                                <span class="eva-badge ${evaSafe ? 'ok' : 'warn'}">${evaSafe ? 'EVA Safe' : 'EVA Unsafe'}</span>
+                            </div>
+                            ${rows}
+                        </div>
+                    `;
+                }
+                html += '</div>';
+            }
+
+            // Safety alerts or all-clear
+            if (alerts.length > 0) {
+                html += `
+                    <div class="weather-alerts">
+                        <div class="weather-alerts-title">⚠ Active Safety Alerts (${alerts.length})</div>
+                        ${alerts.map(a => `<div class="weather-alert-item">${a}</div>`).join('')}
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="weather-all-clear">
+                        ✅ All Clear — No active space weather alerts for your destinations
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        // =========================
+        // DISPLAY RESULTS
+        // =========================
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (!data.success) {
+                // Check if it's a destination error
+                if (data.message && data.message.includes('not currently in our destination list')) {
+                    resultsDiv.innerHTML = `
+                        <div style="text-align: center; padding: 30px; background: rgba(255, 152, 0, 0.1); border-radius: 10px; border: 1px solid #ff9800;">
+                            <h3 style="color: #ff9800; margin-bottom: 15px;">🌍 Destination Not Available</h3>
+                            <p style="color: #d0d0d0; margin-bottom: 20px;">${data.message}</p>
+                            <div style="background: rgba(10, 15, 30, 0.6); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                <p style="color: #b0b0b0; font-size: 0.9em;">💡 Tip: Try selecting a destination from the dropdown menu above, or leave it as "Any Destination" to see all available options.</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div style="text-align: center; color: #f44336;">
+                            <h3>Error</h3>
+                            <p>${data.message || 'Failed to generate itinerary'}</p>
+                        </div>
+                    `;
+                }
+                resultsDiv.classList.add('active');
+                return;
+            }
+            
+            const itinerary = data.itinerary;
+            const validation = data.validation;
+            const verification = data.verification;
+            
+            let html = '';
+
+            // =========================
+            // WEATHER PANEL (top of itinerary)
+            // =========================
+            html += buildWeatherPanel(data.weather || {});
+
+            // Header
+            html += `
+                <div class="itinerary-header">
+                    <h3>${itinerary.itinerary_name || 'Your Journey'}</h3>
+                    <p style="color: #d0d0d0;">${itinerary.summary || ''}</p>
+                    
+                    <div class="itinerary-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Duration</div>
+                            <div class="stat-value">${itinerary.duration_days || 0} days</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Total Cost</div>
+                            <div class="stat-value">$${(itinerary.total_cost_usd || 0).toLocaleString()}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Confidence</div>
+                            <div class="stat-value">${((itinerary.confidence_score || 0) * 100).toFixed(0)}%</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Validation badges -->
+                    <div style="margin-top: 15px;">
+                        ${validation.is_valid ? '<span class="badge badge-success">✓ Validated</span>' : '<span class="badge badge-error">✗ Validation Issues</span>'}
+                        ${verification.is_safe ? '<span class="badge badge-success">✓ Verified</span>' : '<span class="badge badge-warning">⚠ Needs Review</span>'}
+                    </div>
+                </div>
+            `;
+            
+            // Validation issues
+            if (!validation.is_valid && validation.issues && validation.issues.length > 0) {
+                html += `
+                    <div style="background: rgba(244, 67, 54, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f44336;">
+                        <h4 style="color: #f44336; margin-bottom: 10px;">✗ Validation Issues</h4>
+                        <ul style="color: #d0d0d0; padding-left: 20px; margin: 0;">
+                            ${validation.issues.map(issue => `<li style="margin-bottom: 5px;">${issue}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            // Verification issues
+            if (!verification.is_safe && verification.hallucinations && verification.hallucinations.length > 0) {
+                html += `
+                    <div style="background: rgba(255, 152, 0, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ff9800;">
+                        <h4 style="color: #ff9800; margin-bottom: 10px;">⚠ Verification Issues (Needs Review)</h4>
+                        <ul style="color: #d0d0d0; padding-left: 20px; margin: 0;">
+                            ${verification.hallucinations.map(hall => `
+                                <li style="margin-bottom: 8px;">
+                                    <strong style="color: #ff9800;">${hall.type}:</strong> ${hall.description}
+                                    ${hall.severity ? ` <span class="badge badge-${hall.severity === 'critical' ? 'error' : 'warning'}" style="margin-left: 5px;">${hall.severity}</span>` : ''}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            html += '';
+            
+            // Daily plan
+            if (itinerary.daily_plan && itinerary.daily_plan.length > 0) {
+                html += '<h3 style="color: #667eea; margin-bottom: 15px;">📅 Day-by-Day Plan</h3>';
+                
+                itinerary.daily_plan.forEach(day => {
+                    html += `
+                        <div class="day-card">
+                            <h4>Day ${day.day}: ${day.title || 'Travel Day'}</h4>
+                            ${day.date ? `<p style="color: #a0a0a0; margin-bottom: 10px;">${day.date}</p>` : ''}
+                            
+                            ${day.activities && day.activities.length > 0 ? day.activities.map(activity => `
+                                <div class="activity">
+                                    <div class="activity-time">${activity.time || ''} - ${activity.activity || ''}</div>
+                                    <div class="activity-details">
+                                        ${activity.location ? `📍 ${activity.location}` : ''}
+                                        ${activity.duration ? ` | ⏱️ ${activity.duration}` : ''}
+                                        ${activity.cost_usd ? ` | 💰 $${activity.cost_usd.toLocaleString()}` : ''}
+                                    </div>
+                                </div>
+                            `).join('') : ''}
+                            
+                            ${day.accommodation ? `<p style="margin-top: 10px; color: #b0b0b0;">🏨 Accommodation: ${day.accommodation}</p>` : ''}
+                            ${day.notes ? `<p style="margin-top: 5px; color: #a0a0a0; font-size: 0.9em;">📝 ${day.notes}</p>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            // Highlights
+            if (itinerary.highlights && itinerary.highlights.length > 0) {
+                html += '<h3 style="color: #667eea; margin: 20px 0 15px;">✨ Highlights</h3>';
+                html += '<ul style="color: #d0d0d0; padding-left: 20px;">';
+                itinerary.highlights.forEach(highlight => {
+                    html += `<li style="margin-bottom: 8px;">${highlight}</li>`;
+                });
+                html += '</ul>';
+            }
+            
+            // Reasoning
+            if (itinerary.reasoning) {
+                html += `
+                    <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <h4 style="color: #667eea; margin-bottom: 10px;">🧠 AI Reasoning</h4>
+                        <p style="color: #d0d0d0;">${itinerary.reasoning}</p>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = html;
+            resultsDiv.classList.add('active');
+        }
+    </script>
+</body>
+</html>
